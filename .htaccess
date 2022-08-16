@@ -1,0 +1,106 @@
+Options -Indexes 
+ErrorDocument 404 /404.php
+
+<IfModule mod_php.c>
+  php_flag session.use_trans_sid off
+</IfModule>
+
+<IfModule mod_php7.c>
+  php_flag session.use_trans_sid off
+</IfModule>
+
+<IfModule mod_rewrite.c>
+	RewriteCond %{HTTP:X-Forwarded-Proto} ^https$ [NC,OR]
+	RewriteCond %{HTTPS} =on [NC,OR]
+	RewriteCond %{ENV:HTTPS} on [NC,OR]
+	RewriteCond %{SERVER_PORT} ^443$
+	RewriteRule ^(.*)$ - [env=proto:https,E=HTTPS:on]
+
+	RewriteCond %{ENV:proto} !^https$ [NC]
+	RewriteRule ^(.*)$ - [env=proto:http]
+</IfModule>
+
+
+<IfModule mod_rewrite.c>
+	Options +FollowSymLinks
+	RewriteEngine On
+
+	#убираем "www" в начале URL
+	RewriteCond %{HTTP_HOST} ^www\.(.+) [NC]
+	RewriteRule (.*) %{ENV:proto}://%1/$0 [R=301,E=HTTP_REFERER:%{HTTP_REFERER},L]
+
+	#редирект с http на https (при необходимости отредактировать на обратное направление)
+	RewriteCond %{ENV:proto} !^https$ [NC]
+	#RewriteCond %{REQUEST_URI} !ajax [NC]
+	#RewriteCond %{REQUEST_URI} !^\/bitrix\/(admin|tools|components|modules)\/ [NC]
+	RewriteCond %{REQUEST_FILENAME} !/robots\.txt$
+	#RewriteCond %{REQUEST_METHOD} !post [NC]
+	#RewriteCond %{REQUEST_FILENAME} !/bitrix/admin/update_system_partner[^\/]*$
+	RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+<IfModule mod_rewrite.c>
+	#SEO-правила + правила для adminer.php
+
+	RewriteEngine on
+	RewriteBase /
+	RewriteCond %{HTTP_HOST} !=""
+
+	#Это правило запрещает повторяющиеся слэши в URL
+	RewriteCond %{THE_REQUEST} ^[A-Z]+\s(.*)(?<!\/)/{2,}(.*)\sHTTP/[0-9.]+$
+	RewriteCond %{REQUEST_METHOD} !POST [NC]
+	RewriteRule .* %{ENV:proto}://%{SERVER_NAME}%1/%2 [R=301,L]
+
+	#Это правило делает редиректы со страниц, заканчивающихся на index.php, index.html, index.htm (удаляя "index.php" из URL)
+	RewriteCond %{REQUEST_URI} index\.(php|htm|html) [NC]
+	RewriteCond %{REQUEST_URI} !^\/bitrix [NC]
+	RewriteCond %{REQUEST_METHOD} !POST [NC]
+	RewriteRule ^(.*)index\.(php|htm|html)(?:$|(\?[^\/]*)) %{ENV:proto}://%{SERVER_NAME}/$1 [R=301,L]
+
+	#Убираем с конца URL мусорный знак вопроса или амперсанд
+	RewriteCond %{THE_REQUEST} ^[A-Z]+\s(.*)(\?|\&)\sHTTP/[0-9.]+$
+	RewriteCond %{REQUEST_URI} !^\/bitrix [NC]
+	RewriteCond %{REQUEST_METHOD} !POST [NC]
+	RewriteRule .* %{ENV:proto}://%{SERVER_NAME}/%1 [R=301,NE,L]
+
+	#Добавляем слэш в конце адреса
+	RewriteCond %{REQUEST_URI} ^(.*/[^/.]+)($|\?)
+	RewriteCond %{REQUEST_URI} !^\/bitrix [NC]
+	RewriteCond %{REQUEST_METHOD} !POST [NC]
+	RewriteRule .* %{ENV:proto}://%{SERVER_NAME}%1/ [R=301,L]
+
+	#Исправляем баг в URL'ах adminer'а
+	RewriteCond %{THE_REQUEST} (\/bitrix\/admin\/uniplug_sqladminer_admin\.php)\&(.*)\sHTTP/[0-9.]+$ [NC]
+	RewriteRule ^.*$ %{ENV:proto}://%{SERVER_NAME}/%1?%2 [R=301,L]
+</IfModule>
+
+
+
+<IfModule mod_rewrite.c>
+  Options +FollowSymLinks
+  RewriteEngine On
+			
+	# ASPRO_ROBOTS Serve robots.txt with robots.php only if the latter exists
+	RewriteCond %{REQUEST_FILENAME} robots.txt
+	RewriteCond %{DOCUMENT_ROOT}/robots.php -f
+	RewriteRule ^(.*)$ /robots.php [L]
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-l
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_FILENAME} !/bitrix/urlrewrite.php$
+	RewriteRule ^(.*)$ /bitrix/urlrewrite.php [L]
+	RewriteRule .* - [E=REMOTE_USER:%{HTTP:Authorization}]
+</IfModule>
+
+<IfModule mod_dir.c>
+  DirectoryIndex index.php index.html
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive on
+  ExpiresByType image/jpeg "access plus 3 day"
+  ExpiresByType image/gif "access plus 3 day"
+  ExpiresByType image/png "access plus 3 day"
+  ExpiresByType text/css "access plus 3 day"
+  ExpiresByType application/javascript "access plus 3 day"  
+</IfModule>
