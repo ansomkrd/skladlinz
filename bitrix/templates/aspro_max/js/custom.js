@@ -370,6 +370,17 @@ function buildSelect(form_name, cont_name, prop_num, arSKU, arProperties, mode, 
         }
             : function () {
             var selectedSkuId = BX(lastPropCode).value;
+
+            $.ajax({
+              type: "POST",
+              url: arAsproOptions["SITE_DIR"] + "ajax/getDateDel.php",
+              data: {'id':selectedSkuId},
+              dataType: "html",
+              success: function (data) {
+                $("#date-del").text(data);
+              }
+            });
+
             if (this.value != "null") {
                 addHtml(lastPropCode, arSKU, mode, type);
                 cn = this.value;

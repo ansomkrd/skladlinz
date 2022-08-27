@@ -565,6 +565,8 @@ else
 			templateFolder: '<?=CUtil::JSEscape($templateFolder)?>',
 			propertyValidation: true,
 			showWarnings: true,
+			date: '<?=$arResult['DATE_START']?>',
+			time: <?=$arResult['TIME_DATE_START']?>,
 			pickUpMap: {
 				defaultMapPosition: {
 					lat: 55.76,

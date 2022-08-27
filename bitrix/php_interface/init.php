@@ -1,4 +1,11 @@
 <?php
+use Bitrix\Main\Loader; 
+
+Loader::includeModule("highloadblock"); 
+
+use Bitrix\Highloadblock as HL; 
+use Bitrix\Main\Entity;
+
 
 function getCatalogElementProps($sectionCode) {
 	$arProps = [
@@ -212,4 +219,65 @@ function getCatalogElementProps($sectionCode) {
 	}
 	
 	return $arProps;
+}
+
+function getDateDel($spec){
+	$mas = array();
+	if($spec == "Y"){
+		$mas["DATE_START"] = date('d.m.Y', time() + 86400);
+		$mas["TIME_DATE_START"] =  3;
+	}else{
+		$hour = date('G');
+		if($hour < 12){
+			$mas["DATE_START"] = date('d.m.Y');
+			$mas["TIME_DATE_START"] =  2;
+		}elseif($hour < 17){
+			$mas["DATE_START"] = date('d.m.Y');
+			$mas["TIME_DATE_START"] =  3;
+		}elseif($hour > 16){
+			$mas["DATE_START"] = date('d.m.Y' + 86400);
+
+			$WEEKEND = false;
+
+			$hlblock = HL\HighloadBlockTable::getById(7)->fetch(); 
+			$entity = HL\HighloadBlockTable::compileEntity($hlblock); 
+			$entity_data_class = $entity->getDataClass(); 
+
+			if(date('N') < 6){
+				$rsData = $entity_data_class::getList(array(
+					"select" => array("*"),
+					"order" => array("ID" => "ASC"),
+					"filter" => array("UF_DATE"=>date('d.m.Y'),"UF_WEEKEND"=>1) 
+				));
+
+				if($arData = $rsData->Fetch()){
+					$WEEKEND = true;
+				}
+			}else{
+				$rsData = $entity_data_class::getList(array(
+					"select" => array("*"),
+					"order" => array("ID" => "ASC"),
+					"filter" => array("UF_DATE"=>date('d.m.Y'),"UF_WEEKEND"=>0) 
+				));
+
+				if(!$arData = $rsData->Fetch()){
+					$WEEKEND = true;
+				}
+			}
+
+			$mas["WEEKEND"] = $WEEKEND;
+
+			if($WEEKEND){
+				$mas["TIME_DATE_START"] =  2;
+			}else{
+				if($hour < 20){
+					$mas["TIME_DATE_START"] =  1;
+				}else{
+					$mas["TIME_DATE_START"] =  2;
+				}
+			}
+
+		}
+	}
+	return $mas;
 }

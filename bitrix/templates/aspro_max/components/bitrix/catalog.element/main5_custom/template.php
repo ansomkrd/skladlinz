@@ -881,6 +881,41 @@ $iCountProps = count($arResult['DISPLAY_PROPERTIES']) + $offerPropCount;
 														<span class="animate-load dotted" data-event="jqm" data-param-form_id="CHEAPER" data-name="cheaper" data-autoload-product_name="<?=CMax::formatJsName($arCurrentSKU ? $arCurrentSKU['NAME'] : $arResult['NAME']);?>" data-autoload-product_id="<?=$arCurrentSKU ? $arCurrentSKU['ID'] : $arResult['ID'];?>"><?=($arParams["CHEAPER_FORM_NAME"] ? $arParams["CHEAPER_FORM_NAME"] : Loc::getMessage("CHEAPER"));?></span>
 													</div>
 												<?endif;?>
+
+
+												<?
+												$SPECIAL_DELIVERY = "";
+												if (isset($arResult['OFFERS']) && !empty($arResult['OFFERS'])){
+													$SPECIAL_DELIVERY = $arResult["OFFERS"][$arResult["OFFERS_SELECTED"]]["PROPERTIES"]["SPECIAL_DELIVERY"]["VALUE_XML_ID"];
+												}else{
+													$SPECIAL_DELIVERY = $arResult["PROPERTIES"]["SPECIAL_DELIVERY"]["VALUE_XML_ID"];
+												}
+												if(empty($SPECIAL_DELIVERY)){
+													$SPECIAL_DELIVERY = "N";
+												}
+												$dateDel = getDateDel($SPECIAL_DELIVERY);
+												    $maseng = "Доставим ";
+													if($dateDel["DATE_START"] == date("d.m.Y")){
+														$maseng .= "сегодня c ";
+													}else{
+														$maseng .= "завтра c ";
+													}
+
+													switch ($dateDel["TIME_DATE_START"]) {
+														case 1:
+															$maseng .= "9-00 до 13-00";
+															break;
+														case 2:
+															$maseng .= "13-00 до 18-00";
+															break;
+														case 3:
+															$maseng .= "19-00 до 23-00";
+															break;
+													}
+												?>
+
+												<div><b id="date-del"><?=$maseng?></b></div>
+
 											</div>
 										</div>
 
