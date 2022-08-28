@@ -7228,13 +7228,23 @@ BX.namespace("BX.Sale.OrderAjaxComponent"),
             ));
         },
         alterDateProperty: function (settings, inputText) {
+          var selectName = "";
+          switch ($('[name="PERSON_TYPE_OLD"]').val()) {
+            case "1":
+              selectName = "ORDER_PROP_21";
+              break;
+            case "2":
+              selectName = "ORDER_PROP_23";
+              break;
+          }
+          console.log(selectName);
           var self = this;
 
           var parentNode = BX.findParent(inputText, { tagName: "DIV" }),
             addon;
           setTimeout(function () {
             var i = 0;
-            $("[name='ORDER_PROP_21'] option").each(function (e) {
+            $("[name='" + selectName + "'] option").each(function (e) {
               i++;
               if (i < self.time) {
                 this.setAttribute("disabled", "disabled");
@@ -7243,7 +7253,7 @@ BX.namespace("BX.Sale.OrderAjaxComponent"),
                 this.selected = true;
               }
             });
-            $("[name='ORDER_PROP_21']").ikSelect("reset");
+            $("[name='" + selectName + "']").ikSelect("reset");
           }, 1000);
 
           parentNode.querySelector("input[type=text]").value = self.date;
@@ -7297,7 +7307,9 @@ BX.namespace("BX.Sale.OrderAjaxComponent"),
                     var timestamp = Date.parse(date);
                     if (timestamp == datestart) {
                       var i = 0;
-                      $("[name='ORDER_PROP_21'] option").each(function (e) {
+                      $("[name='" + selectName + "'] option").each(function (
+                        e
+                      ) {
                         i++;
                         if (i < self.time) {
                           this.setAttribute("disabled", "disabled");
@@ -7306,12 +7318,14 @@ BX.namespace("BX.Sale.OrderAjaxComponent"),
                           this.selected = true;
                         }
                       });
-                      $("[name='ORDER_PROP_21']").ikSelect("reset");
+                      $("[name='" + selectName + "']").ikSelect("reset");
                     } else {
-                      $("[name='ORDER_PROP_21'] option").each(function (e) {
+                      $("[name='" + selectName + "'] option").each(function (
+                        e
+                      ) {
                         this.removeAttribute("disabled");
                       });
-                      $("[name='ORDER_PROP_21']").ikSelect("reset");
+                      $("[name='" + selectName + "']").ikSelect("reset");
                     }
                   },
                 });
@@ -7367,7 +7381,7 @@ BX.namespace("BX.Sale.OrderAjaxComponent"),
                   var timestamp = Date.parse(date);
                   if (timestamp == datestart) {
                     var i = 0;
-                    $("[name='ORDER_PROP_21'] option").each(function (e) {
+                    $("[name='" + selectName + "'] option").each(function (e) {
                       i++;
                       if (i < self.time) {
                         this.setAttribute("disabled", "disabled");
@@ -7376,12 +7390,12 @@ BX.namespace("BX.Sale.OrderAjaxComponent"),
                         this.selected = true;
                       }
                     });
-                    $("[name='ORDER_PROP_21']").ikSelect("reset");
+                    $("[name='" + selectName + "']").ikSelect("reset");
                   } else {
-                    $("[name='ORDER_PROP_21'] option").each(function (e) {
+                    $("[name='" + selectName + "'] option").each(function (e) {
                       this.removeAttribute("disabled");
                     });
-                    $("[name='ORDER_PROP_21']").ikSelect("reset");
+                    $("[name='" + selectName + "']").ikSelect("reset");
                   }
                 },
               });
